@@ -220,6 +220,31 @@ def repos_apply_patches(repos):
     except CommandExecError as e:
         raise TaskExecError('apply patches', e.ret_code)
 
+def find_buildtools_env(init_repo):
+    """
+    Look for builtools install.
+    """
+    def_install = os.path.join(init_repo.path, "buildtools")
+    if os.path.isdir(def_install):
+       envfiles = glob.glob(os.path.join(def_install, "environment-setup-*"))
+       if len(envfiles) == 1:
+          return(os.path.realpath(envfiles[0]))
+    if "BUILDTOOLS_DIR" in os.environ:
+       envfiles = glob.glob(os.path.join(os.environ["BUILDTOOLS_DIR"],"environment-setup-*"))
+       if len(envfiles) == 1:
+          return(os.path.realpath(envfiles[0]))
+    if "GIT_SSL_CAINFO" in os.environ:
+       git_ssl_info = os.environ["GIT_SSL_CAINFO"]
+       top = os.path.dirname(os.path.dirname(
+                             os.path.dirname(
+                             os.path.dirname(
+                             os.path.dirname(
+                             os.path.dirname(git_ssl_info))))))
+       envfiles = glob.glob(os.path.join(top,"environment-setup-*"))
+       if len(envfiles) == 1:
+          return(os.path.realpath(envfiles[0]))
+    return None
+
 
 def get_build_environ(build_system):
     """
@@ -229,6 +254,7 @@ def get_build_environ(build_system):
     # creates the conf directory
 
     init_repo = None
+    buildtools_script=""
     if build_system in ['openembedded', 'oe']:
         scripts = ['oe-init-build-env']
     elif build_system == 'isar':
@@ -251,12 +277,18 @@ def get_build_environ(build_system):
     if not init_repo:
         raise InitBuildEnvError('Did not find any init-build-env script')
 
+    buildtools_env = find_buildtools_env(init_repo)
+
+    if buildtools_env:
+       buildtools_script="source %s\n" % (buildtools_env)
+
     with tempfile.TemporaryDirectory() as temp_dir:
         script = """#!/bin/bash
         set -e
+        %s
         source %s $1 > /dev/null
         env
-        """ % init_script
+        """ % (buildtools_env, init_script)
 
         get_bb_env_file = pathlib.Path(temp_dir) / "get_bb_env"
         get_bb_env_file.write_text(script)
