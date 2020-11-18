@@ -32,6 +32,7 @@ import asyncio
 import errno
 import pathlib
 import signal
+import glob
 from subprocess import Popen, PIPE
 from .context import get_context
 from .kasusererror import KasUserError, CommandExecError
