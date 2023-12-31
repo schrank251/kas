@@ -223,7 +223,7 @@ def repos_apply_patches(repos):
 
 def find_buildtools_env(init_repo):
     """
-    Look for builtools install.
+    Look for buildtools install.
     """
     def_install = os.path.join(init_repo.path, "buildtools")
     if os.path.isdir(def_install):
@@ -281,7 +281,9 @@ def get_build_environ(build_system):
     buildtools_env = find_buildtools_env(init_repo)
 
     if buildtools_env:
-       buildtools_script="source %s\n" % (buildtools_env)
+        buildtools_env ="source {}\n".format(buildtools_env)
+    else:
+        buildtools_env =""
 
     with tempfile.TemporaryDirectory() as temp_dir:
         script = """#!/bin/bash
