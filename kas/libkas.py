@@ -189,23 +189,31 @@ def find_buildtools_env(init_repo):
     """
     def_install = os.path.join(init_repo.path, "buildtools")
     if os.path.isdir(def_install):
-       envfiles = glob.glob(os.path.join(def_install, "environment-setup-*"))
-       if len(envfiles) == 1:
-          return(os.path.realpath(envfiles[0]))
+        envfiles = glob.glob(os.path.join(def_install, "environment-setup-*"))
+        if len(envfiles) == 1:
+            return os.path.realpath(envfiles[0])
     if "BUILDTOOLS_DIR" in os.environ:
-       envfiles = glob.glob(os.path.join(os.environ["BUILDTOOLS_DIR"],"environment-setup-*"))
-       if len(envfiles) == 1:
-          return(os.path.realpath(envfiles[0]))
+        envfiles = glob.glob(
+            os.path.join(os.environ["BUILDTOOLS_DIR"], "environment-setup-*")
+        )
+        if len(envfiles) == 1:
+            return os.path.realpath(envfiles[0])
     if "GIT_SSL_CAINFO" in os.environ:
-       git_ssl_info = os.environ["GIT_SSL_CAINFO"]
-       top = os.path.dirname(os.path.dirname(
-                             os.path.dirname(
-                             os.path.dirname(
-                             os.path.dirname(
-                             os.path.dirname(git_ssl_info))))))
-       envfiles = glob.glob(os.path.join(top,"environment-setup-*"))
-       if len(envfiles) == 1:
-          return(os.path.realpath(envfiles[0]))
+        git_ssl_info = os.environ["GIT_SSL_CAINFO"]
+        top = os.path.dirname(
+            os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.dirname(git_ssl_info)
+                        )
+                    )
+                )
+            )
+        )
+        envfiles = glob.glob(os.path.join(top, "environment-setup-*"))
+        if len(envfiles) == 1:
+            return os.path.realpath(envfiles[0])
     return None
 
 
